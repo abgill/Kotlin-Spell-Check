@@ -6,7 +6,7 @@ class Trie : ITrie {
 
     override fun add(word :String): Boolean {
         var current : TrieNode = rootNode
-        val wordArr = word.toCharArray()
+        val wordArr = word.toLowerCase().toCharArray()
 
         wordArr.forEach {letter ->
             current.add(letter)

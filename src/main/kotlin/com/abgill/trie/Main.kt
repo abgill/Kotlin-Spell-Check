@@ -6,9 +6,9 @@ import com.abgill.spellCheck.SpellCheck
 fun main(args: Array<String>){
     val trie :ITrie = Trie()
 
-    val spellCheck : SpellCheck = EdtDistChecker()
+    val spellCheck : SpellCheck = EdtDistChecker("words.txt")
 
-    spellCheck.getSuggestions("word")
+    spellCheck.getSuggestions("wordz")
 
 
     trie.add("abcde")
