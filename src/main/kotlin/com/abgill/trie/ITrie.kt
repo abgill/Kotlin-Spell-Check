@@ -1,6 +1,6 @@
 package com.abgill.trie
 
 interface ITrie {
-    fun add(): Boolean
-    fun find(): Int
+    fun add(word: String): Boolean
+    fun find(word: String): Int
 }
