@@ -38,6 +38,21 @@ class EdtDistChecker(dictionaryPath: String) : SpellCheck{
             }
         }
 
+        if(suggestionList.size < 1){
+            val suggestionSetCopy = TreeSet<String>(suggestionSet)
+
+            suggestionSetCopy.forEach { term ->
+                buildSuggestionList(term, suggestionSet)
+            }
+
+            suggestionSet.forEach { searchTerm ->
+                if(dictionary.find(searchTerm) > 0){
+                    suggestionList.add(searchTerm)
+                }
+            }
+
+        }
+
 
         return suggestionList
     }
