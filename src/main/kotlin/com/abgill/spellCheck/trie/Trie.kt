@@ -1,4 +1,4 @@
-package com.abgill.trie
+package com.abgill.spellCheck.trie
 
 class Trie : ITrie {
 

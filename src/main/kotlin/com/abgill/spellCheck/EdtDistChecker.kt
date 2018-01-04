@@ -1,80 +1,63 @@
 package com.abgill.spellCheck
 
-import com.abgill.trie.Trie
-import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
 
 
-/*
-There is probably a better way to handle the loops
- */
-class EdtDistChecker(dictionaryPath: String) : SpellCheck{
-    private val dictionary = Trie()
+class EdtDistChecker(dictionaryPath: String) : SpellCheck {
+    private val dictionary = TrieBuilder(dictionaryPath).buildTrie()
 
-    init {
-        File(dictionaryPath).forEachLine { ln ->
-            dictionary.add(ln)
-        }
-    }
+    override fun getSuggestions(word: String): Set<Word> {
+        val uncheckedSuggestions: MutableSet<String> = TreeSet()
 
-
-
-    override fun getSuggestions(word: String): List<String> {
-        val suggestionSet: TreeSet<String> = TreeSet()
-
-        if(dictionary.find(word) > 0){
-            return listOf(word)
+        if (dictionary.find(word) > 0) {
+            return setOf(Word(word, dictionary.find(word)))
         }
 
+        buildSuggestionSet(word, uncheckedSuggestions)
 
-        buildSuggestionList(word,suggestionSet)
+        val suggestionSet: MutableSet<Word> = TreeSet()
 
-        val suggestionList : MutableList<String> = ArrayList()
-
-        suggestionSet.forEach { searchTerm ->
-            if(dictionary.find(searchTerm) > 0){
-                suggestionList.add(searchTerm)
+        uncheckedSuggestions.forEach { searchTerm ->
+            val count = dictionary.find(searchTerm)
+            if (count > 0) {
+                suggestionSet.add(Word(searchTerm, count))
             }
         }
 
-        if(suggestionList.size < 1){
-            val suggestionSetCopy = TreeSet<String>(suggestionSet)
+        if (suggestionSet.size < 1) {
+            val suggestionSetCopy = TreeSet<String>(uncheckedSuggestions)
 
             suggestionSetCopy.forEach { term ->
-                buildSuggestionList(term, suggestionSet)
+                buildSuggestionSet(term, uncheckedSuggestions)
             }
 
-            suggestionSet.forEach { searchTerm ->
-                if(dictionary.find(searchTerm) > 0){
-                    suggestionList.add(searchTerm)
+            uncheckedSuggestions.forEach { searchTerm ->
+                val count = dictionary.find(searchTerm)
+                if (count > 0) {
+                    suggestionSet.add(Word(searchTerm, count))
                 }
             }
 
         }
 
 
-        return suggestionList
+        return suggestionSet
     }
 
-    private fun buildSuggestionList(word: String, suggestionSet: TreeSet<String>){
+    private fun buildSuggestionSet(word: String, suggestionSet: MutableSet<String>) {
         addSwapDist(word, suggestionSet)
         insDist(word, suggestionSet)
         modDist(word, suggestionSet)
         delDist(word, suggestionSet)
 
-//        addSwapDist(word, suggestionSet)
-//        insDist(word, suggestionSet)
-//        modDist(word, suggestionSet)
-//        delDist(word, suggestionSet)
     }
 
-    private fun addSwapDist(word: String, suggestionSet: TreeSet<String>){
+    private fun addSwapDist(word: String, suggestionSet: MutableSet<String>) {
         val wordArr = word.toCharArray()
 
         //Todo: find way to do this with less copying
-        wordArr.forEachIndexed({i, _ ->
-            wordArr.forEachIndexed({j, _ ->
+        wordArr.forEachIndexed({ i, _ ->
+            wordArr.forEachIndexed({ j, _ ->
                 val wordArrCopy = wordArr.copyOf()
                 val charHolder = wordArr[i]
 
@@ -88,10 +71,10 @@ class EdtDistChecker(dictionaryPath: String) : SpellCheck{
         })
     }
 
-    private fun insDist (word: String, suggestionSet: TreeSet<String>){
+    private fun insDist(word: String, suggestionSet: MutableSet<String>) {
 
-        for(i in 0..25){
-            word.forEachIndexed({idx, _ ->
+        for (i in 0..25) {
+            word.forEachIndexed({ idx, _ ->
                 val builder = StringBuilder(word)
                 builder.insert(idx, (i + 'a'.toInt()).toChar())
 
@@ -101,15 +84,15 @@ class EdtDistChecker(dictionaryPath: String) : SpellCheck{
             //adding each letter onto end
 
             val builder = StringBuilder(word)
-            builder.insert(builder.length , (i + 'a'.toInt()).toChar())
+            builder.insert(builder.length, (i + 'a'.toInt()).toChar())
 
             suggestionSet.add(builder.toString())
         }
     }
 
-    private fun modDist(word: String, suggestionSet: TreeSet<String>){
-        word.forEachIndexed({idx, _ ->
-            for(i in 0..25){
+    private fun modDist(word: String, suggestionSet: MutableSet<String>) {
+        word.forEachIndexed({ idx, _ ->
+            for (i in 0..25) {
                 val builder = StringBuilder(word)
                 builder.setCharAt(idx, (i + 'a'.toInt()).toChar())
 
@@ -118,13 +101,12 @@ class EdtDistChecker(dictionaryPath: String) : SpellCheck{
         })
     }
 
-    private fun delDist(word: String, suggestionSet: TreeSet<String>){
-        word.forEachIndexed({idx, _ ->
+    private fun delDist(word: String, suggestionSet: MutableSet<String>) {
+        word.forEachIndexed({ idx, _ ->
             val builder = StringBuilder(word)
             builder.deleteCharAt(idx)
 
             suggestionSet.add(builder.toString())
         })
     }
-
 }

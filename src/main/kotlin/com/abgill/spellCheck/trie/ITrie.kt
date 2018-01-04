@@ -1,4 +1,4 @@
-package com.abgill.trie
+package com.abgill.spellCheck.trie
 
 interface ITrie {
     fun add(word: String): Boolean

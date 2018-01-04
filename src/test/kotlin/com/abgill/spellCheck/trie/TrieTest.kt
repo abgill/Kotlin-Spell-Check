@@ -1,4 +1,4 @@
-package com.abgill.trie
+package com.abgill.spellCheck.trie
 
 import org.junit.Assert.*
 import org.junit.Test
